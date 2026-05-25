@@ -6,20 +6,12 @@ Time allocation per CSCI435 project brief: **7-8 minutes live demo + 4 minutes Q
 
 - Power on the demo laptop, plug into the projector (use HDMI not USB-C if possible).
 - Close all webcam-using apps (Teams, Zoom, Discord, OBS).
-- Open two terminals.
-  - Terminal A:
-    ```powershell
-    cd C:\Users\ykanj\Downloads\UOWD\Uni25-26\sem3_26\CSCI435\SignSpeak-AI
-    .\.venv\Scripts\Activate.ps1
-    cd backend
-    uvicorn app.main:app --host 127.0.0.1 --port 8000
-    ```
-  - Terminal B:
-    ```powershell
-    cd C:\Users\ykanj\Downloads\UOWD\Uni25-26\sem3_26\CSCI435\SignSpeak-AI\frontend
-    npm run start    # or: npm run dev
-    ```
-- Open Chrome and navigate to `http://localhost:3000`.
+- Open two terminals only if you need to debug; normal demo uses one command:
+  ```powershell
+  cd C:\Users\ykanj\Downloads\UOWD\Uni25-26\sem3_26\CSCI435\SignSpeak-AI
+  .\scripts\run_app.ps1
+  ```
+- Open Chrome and navigate to `http://localhost:8000`.
 - Allow webcam permission once; verify the live page loads.
 - Plug in the ring light (or open a bright window). Off-axis side-lighting works best.
 - Have a second laptop on the table with the pre-recorded `demo_video.mp4` already open in VLC, paused on frame 1 - this is the backup if the live demo fails.

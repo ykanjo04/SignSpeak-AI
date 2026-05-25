@@ -52,7 +52,7 @@ Browser (Next.js + Tailwind)
 - **Frontend:** Next.js 14, TypeScript, Tailwind CSS, Web Speech API
 - **Backend:** FastAPI, Uvicorn, OpenCV, MediaPipe
 - **ML:** PyTorch (MobileNetV3-Small fine-tuned + custom MLP)
-- **Datasets:** [ASL Alphabet](https://www.kaggle.com/datasets/grassknoted/asl-alphabet) (Kaggle), [Sign Language MNIST](https://www.kaggle.com/datasets/datamunge/sign-language-mnist) (Kaggle), [ArSL2018](https://www.kaggle.com/datasets/muhammadkhalid/arabic-sign-language-dataset-2022) (Kaggle)
+- **Datasets:** [ASL Alphabet](https://www.kaggle.com/datasets/grassknoted/asl-alphabet) (Kaggle), [Sign Language MNIST](https://www.kaggle.com/datasets/datamunge/sign-language-mnist) (Kaggle), [ArSL2018](https://huggingface.co/datasets/pain/ArASL_Database_Grayscale) (Hugging Face)
 
 ## Quick start
 
@@ -91,29 +91,47 @@ python ml\scripts\train_mobilenet.py
 python ml\scripts\evaluate.py
 ```
 
-First run prompts for your Kaggle username + API key. Get one at
-<https://www.kaggle.com/settings> → "Create New Token".
+First run prompts for your Kaggle username + API key (ASL + MNIST only). Get one at
+<https://www.kaggle.com/settings> → "Create New Token". ArSL2018 is fetched from
+[Hugging Face](https://huggingface.co/datasets/pain/ArASL_Database_Grayscale) and
+does not require Kaggle terms acceptance.
 
 Trained checkpoints land in `backend/app/models/checkpoints/`.
 
-### 3. Run the app
+### 3. Run the app (single port)
 
-In one terminal:
+Everything — UI, WebSocket, and upload API — runs on **port 8000**:
 
 ```powershell
+.\scripts\run_app.ps1
+```
+
+Open <http://localhost:8000> (live mode: <http://localhost:8000/live/>).
+
+To skip rebuilding the frontend on subsequent starts:
+
+```powershell
+.\scripts\run_app.ps1 -SkipBuild
+```
+
+<details>
+<summary>Legacy two-terminal dev mode (optional)</summary>
+
+```powershell
+# Terminal 1
 .\.venv\Scripts\Activate.ps1
 cd backend
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
 
-In another terminal:
-
-```powershell
+# Terminal 2
 cd frontend
+$env:NEXT_PUBLIC_BACKEND_HTTP="http://127.0.0.1:8000"
+$env:NEXT_PUBLIC_BACKEND_WS="ws://127.0.0.1:8000"
 npm run dev
 ```
 
 Open <http://localhost:3000>.
+</details>
 
 ## Repository layout
 

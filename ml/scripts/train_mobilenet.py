@@ -36,7 +36,7 @@ from tqdm import tqdm
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.data.augment import image_eval_transform, image_train_transform  # noqa: E402
-from app.data.labels import NUM_CLASSES  # noqa: E402
+from app.data.labels import ARSL_CLASSES, NUM_ASL, NUM_CLASSES  # noqa: E402
 from app.models.mobilenet import build_mobilenet  # noqa: E402
 
 
@@ -49,11 +49,47 @@ LANDMARKS_PATH = ROOT / "ml" / "data" / "processed" / "landmarks.npz"
 CKPT_PATH = ROOT / "backend" / "app" / "models" / "checkpoints" / "mobilenet_v3_static.pt"
 HISTORY_PATH = ROOT / "ml" / "results" / "mobilenet_history.json"
 IMG_SIZE = 96
+ARSL_ROOT = ROOT / "ml" / "data" / "arsl"
+
+
+def _ensure_arsl_full_crops() -> None:
+    """Cache upscaled full-frame ArSL images (32x32 HF exports) for MobileNet."""
+    if not ARSL_ROOT.exists():
+        return
+    print("Caching ArSL full-frame crops for MobileNet...")
+    for j, cls_name in enumerate(ARSL_CLASSES):
+        lbl = NUM_ASL + j
+        cls_dir = ARSL_ROOT / cls_name
+        if not cls_dir.is_dir():
+            continue
+        out_dir = CROP_DIR / str(lbl)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        existing = sum(1 for _ in out_dir.glob("arsl_*.jpg"))
+        if existing >= 300:
+            continue
+        for i, img_path in enumerate(sorted(cls_dir.glob("*.png"))):
+            if i >= 400:
+                break
+            out_path = out_dir / f"arsl_{i:05d}.jpg"
+            if out_path.exists():
+                continue
+            img = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
+            if img is None:
+                continue
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            img = cv2.resize(img, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_CUBIC)
+            cv2.imwrite(str(out_path), img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
 
 def _ensure_crops() -> None:
-    """If ``crops/`` is empty, regenerate hand crops from the source images."""
-    if CROP_DIR.exists() and any(CROP_DIR.rglob("*.jpg")):
+    """If ASL hand crops are missing, regenerate them from landmark source paths."""
+    _ensure_arsl_full_crops()
+    has_asl_crops = any(
+        any((CROP_DIR / str(i)).glob("*.jpg"))
+        for i in range(NUM_ASL)
+        if (CROP_DIR / str(i)).exists()
+    )
+    if has_asl_crops:
         return
     if not LANDMARKS_PATH.exists():
         sys.exit("landmarks.npz missing -- run extract_landmarks.py first.")
@@ -73,6 +109,15 @@ def _ensure_crops() -> None:
         if img is None:
             continue
         h, w = img.shape[:2]
+        min_dim = min(h, w)
+        if min_dim < 200:
+            scale = 256 / min_dim
+            img = cv2.resize(
+                img,
+                (max(1, int(w * scale)), max(1, int(h * scale))),
+                interpolation=cv2.INTER_CUBIC,
+            )
+            h, w = img.shape[:2]
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         res = hands.process(rgb)
         if not res.multi_hand_landmarks:
@@ -113,6 +158,26 @@ def _index_crops() -> tuple[list[Path], list[int]]:
     return files, labels
 
 
+from collections import Counter
+
+
+def _train_test_split_safe(files, labels, test_size=0.15, random_state=42):
+    counts = Counter(labels)
+    keep_idx = [i for i, lbl in enumerate(labels) if counts[lbl] >= 2]
+    if len(keep_idx) < len(labels):
+        print(f"  dropping {len(labels) - len(keep_idx)} singleton crop samples before split")
+    files = [files[i] for i in keep_idx]
+    labels = [labels[i] for i in keep_idx]
+    try:
+        return train_test_split(
+            files, labels, test_size=test_size, random_state=random_state, stratify=labels
+        )
+    except ValueError:
+        return train_test_split(
+            files, labels, test_size=test_size, random_state=random_state
+        )
+
+
 class CropDataset(Dataset):
     def __init__(self, files: list[Path], labels: list[int], transform):
         self.files = files
@@ -135,9 +200,7 @@ def main() -> None:
         sys.exit("No crops to train on.")
     print(f"  found {len(files):,} crops across {len(set(labels))} classes")
 
-    tr_f, te_f, tr_l, te_l = train_test_split(
-        files, labels, test_size=0.15, random_state=42, stratify=labels
-    )
+    tr_f, te_f, tr_l, te_l = _train_test_split_safe(files, labels)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"  device: {device}")

@@ -28,11 +28,13 @@ ml/cache/
 install.log
 frontend_install.log
 training.log
+ml/results/extract_log*.txt
 
 # Node / Next.js
 node_modules/
 .next/
 out/
+frontend/out/
 .npm
 .yarn/
 *.tsbuildinfo

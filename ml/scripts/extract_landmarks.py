@@ -17,6 +17,7 @@ Run as::
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import warnings
@@ -38,8 +39,44 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["GLOG_minloglevel"] = "3"
 
 DATA_DIR = ROOT / "ml" / "data"
+INDEX_PATH = DATA_DIR / "datasets.json"
 OUT_DIR = ROOT / "ml" / "data" / "processed"
 OUT_PATH = OUT_DIR / "landmarks.npz"
+
+
+def _source_root(source: str) -> Path | None:
+    """Find on-disk root for the given source (asl/arsl/mnist).
+
+    Looks first at ``ml/data/<source>`` (legacy layout) and then at the
+    path recorded by ``download_datasets.py`` in ``datasets.json``.
+    """
+    legacy = DATA_DIR / source
+    if legacy.exists() and any(legacy.iterdir()):
+        return legacy
+    if INDEX_PATH.exists():
+        try:
+            idx = json.loads(INDEX_PATH.read_text())
+        except json.JSONDecodeError:
+            idx = {}
+        if source in idx and Path(idx[source]).exists():
+            return Path(idx[source])
+    return None
+
+
+def _prepare_for_hands(img: np.ndarray) -> np.ndarray:
+    """Upscale tiny dataset images so MediaPipe Hands can detect landmarks."""
+    if img.ndim == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    h, w = img.shape[:2]
+    min_dim = min(h, w)
+    if min_dim < 256:
+        scale = 256 / min_dim
+        img = cv2.resize(
+            img,
+            (max(1, int(w * scale)), max(1, int(h * scale))),
+            interpolation=cv2.INTER_CUBIC,
+        )
+    return img
 
 
 def _wrist_normalise(landmarks: np.ndarray) -> np.ndarray:
@@ -89,10 +126,10 @@ def _iter_dataset_images(
     source: str,
     limit_per_class: int | None,
 ) -> Iterable[tuple[int, Path]]:
-    # Different Kaggle packagings put the class folders at different depths;
-    # search up to two levels deep.
-    base = DATA_DIR / source
-    if not base.exists():
+    # Different Kaggle packagings put the class folders at different
+    # depths; search up to two levels deep.
+    base = _source_root(source)
+    if base is None:
         return
     candidate_roots = [base]
     for child in base.iterdir():
@@ -163,6 +200,7 @@ def main() -> None:
             img = cv2.imread(str(fp))
             if img is None:
                 continue
+            img = _prepare_for_hands(img)
             rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             res = hands_model.process(rgb)
             if not res.multi_hand_landmarks:

@@ -61,11 +61,21 @@ HIST_MOBI = ROOT / "ml" / "results" / "mobilenet_history.json"
 
 
 def _load_test_set() -> tuple[np.ndarray, np.ndarray]:
+    from collections import Counter
+
     blob = np.load(LANDMARKS, allow_pickle=True)
     X, y = blob["X"], blob["y"]
-    _, X_te, _, y_te = train_test_split(
-        X, y, test_size=0.15, random_state=42, stratify=y
-    )
+    counts = Counter(y)
+    keep = np.array([counts[int(yi)] >= 2 for yi in y])
+    X, y = X[keep], y[keep]
+    try:
+        _, X_te, _, y_te = train_test_split(
+            X, y, test_size=0.15, random_state=42, stratify=y
+        )
+    except ValueError:
+        _, X_te, _, y_te = train_test_split(
+            X, y, test_size=0.15, random_state=42
+        )
     return X_te, y_te
 
 
@@ -292,8 +302,14 @@ def main() -> None:
     _fps_latency_bench(device)
 
     # Save a sklearn classification report for the appendix
+    present = sorted(set(y_te.tolist()) | set(y_pred.tolist()))
+    target_names = [ALL_CLASSES[i] for i in present]
     report_txt = classification_report(
-        y_te, y_pred, target_names=ALL_CLASSES, zero_division=0
+        y_te,
+        y_pred,
+        labels=present,
+        target_names=target_names,
+        zero_division=0,
     )
     (RESULTS / "classification_report.txt").write_text(report_txt, encoding="utf-8")
     print("\nAll evaluation artefacts saved in", RESULTS)
