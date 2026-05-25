@@ -1,0 +1,4 @@
+Variant,Accuracy
+Landmark MLP (baseline),0.9888
+Landmark MLP (z=0),0.9483
+Landmark MLP + 3% noise,0.9839

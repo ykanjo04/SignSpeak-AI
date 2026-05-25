@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BACKEND_WS } from "@/lib/config";
+import { backendWsBase } from "@/lib/config";
 import type { PredictionMessage, Language } from "@/lib/types";
 import HandSkeletonOverlay from "./HandSkeletonOverlay";
 
@@ -42,7 +42,7 @@ export default function WebcamStream({ language, onPrediction }: Props) {
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
 
-      const ws = new WebSocket(`${BACKEND_WS}/ws/live`);
+      const ws = new WebSocket(`${backendWsBase()}/ws/live`);
       ws.binaryType = "arraybuffer";
       wsRef.current = ws;
 

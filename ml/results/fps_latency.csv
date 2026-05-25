@@ -1,0 +1,5 @@
+Metric,Value
+Mean latency ms,42.28
+P95 latency ms,73.26
+FPS (sustained),23.65
+Frames measured,30

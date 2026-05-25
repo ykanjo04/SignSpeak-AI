@@ -2,23 +2,27 @@
 One-shot dataset download helper.
 
 Datasets used by SignSpeak AI:
-    1. ASL Alphabet         (grassknoted/asl-alphabet)
-    2. Sign Language MNIST  (datamunge/sign-language-mnist)
-    3. ArSL2018             (muhammadkhalid/arabic-sign-language-dataset-2022)
+    1. ASL Alphabet         (grassknoted/asl-alphabet)          — Kaggle
+    2. Sign Language MNIST  (datamunge/sign-language-mnist)     — Kaggle
+    3. ArSL2018             (pain/ArASL_Database_Grayscale)     — Hugging Face
+
+The script records the on-disk locations of each successfully downloaded
+dataset in ``ml/data/datasets.json``. ``extract_landmarks.py`` reads that
+JSON to find the source images.
+
+ArSL is fetched from Hugging Face because every Kaggle ArSL mirror requires
+a one-time terms-acceptance click on the dataset page (403 otherwise).
 
 Usage:
-    python ml/scripts/download_datasets.py [--skip arsl|asl|mnist] [--limit 1000]
-
-Requires the `kagglehub` package. The first call will prompt for your Kaggle
-username and API key if none is configured. Get a free API key at
-https://www.kaggle.com/settings -> Create New Token.
+    python ml/scripts/download_datasets.py [--skip arsl|asl|mnist]
+    python ml/scripts/download_datasets.py --arsl-limit 400
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
-import shutil
 import sys
 from pathlib import Path
 
@@ -26,36 +30,30 @@ import kagglehub
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "ml" / "data"
+INDEX_PATH = DATA_DIR / "datasets.json"
+ARSL_OUT = DATA_DIR / "arsl"
 
-DATASETS = {
+KAGGLE_DATASETS: dict[str, list[str]] = {
     "asl": [
         "grassknoted/asl-alphabet",
     ],
     "mnist": [
         "datamunge/sign-language-mnist",
     ],
-    # The Arabic Sign Language dataset has had multiple Kaggle re-uploads.
-    # We try each in order until one succeeds.
-    "arsl": [
-        "muhammadkhalid/arabic-sign-language-dataset-2022",
-        "mloey1/arabic-sign-language-2018",
-        "muhammadalbrham/rgb-arabic-alphabets-sign-language-dataset",
-    ],
 }
+
+HF_ARSL_REPO = "pain/ArASL_Database_Grayscale"
 
 
 def _ensure_kaggle_credentials() -> None:
-    """If neither env vars nor kaggle.json are present, prompt the user."""
     if os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"):
         return
-    home = Path.home()
-    kj = home / ".kaggle" / "kaggle.json"
+    kj = Path.home() / ".kaggle" / "kaggle.json"
     if kj.exists():
         return
     print("=" * 70)
     print("Kaggle credentials not found.")
     print("Get a free token at https://www.kaggle.com/settings -> Create New Token")
-    print("The downloaded kaggle.json file contains your username + key.")
     print("=" * 70)
     user = input("Kaggle username: ").strip()
     key = input("Kaggle key:      ").strip()
@@ -71,62 +69,139 @@ def _ensure_kaggle_credentials() -> None:
     os.environ["KAGGLE_KEY"] = key
 
 
-def _try_download(slug: str) -> Path | None:
+def _try_kaggle_download(slug: str) -> Path | None:
     print(f"  attempting: {slug}")
     try:
         path = kagglehub.dataset_download(slug)
         return Path(path)
-    except Exception as exc:        # noqa: BLE001
-        print(f"  failed:    {slug}  ({exc})")
+    except Exception as exc:  # noqa: BLE001
+        msg = str(exc).splitlines()[0][:120]
+        print(f"  failed:    {slug}  ({msg})")
         return None
 
 
-def download_one(key: str, slugs: list[str]) -> None:
-    target = DATA_DIR / key
-    if target.exists() and any(target.iterdir()):
-        print(f"[{key}] already present at {target}, skipping.")
-        return
-    print(f"[{key}] downloading...")
-    src: Path | None = None
+def download_kaggle_one(key: str, slugs: list[str]) -> Path | None:
+    print(f"[{key}] downloading from Kaggle...")
     for slug in slugs:
-        src = _try_download(slug)
+        src = _try_kaggle_download(slug)
         if src is not None and any(src.iterdir()):
-            break
-    if src is None:
-        print(f"[{key}] all Kaggle slugs failed. Skipping.")
-        return
-    target.mkdir(parents=True, exist_ok=True)
-    # Copy (not move) so kagglehub's cache is preserved for re-runs.
-    print(f"[{key}] copying from {src} to {target} ...")
-    for entry in src.iterdir():
-        dest = target / entry.name
-        if dest.exists():
+            print(f"[{key}] cached at {src}")
+            return src
+    print(f"[{key}] all Kaggle slugs failed.")
+    return None
+
+
+def _arsl_already_exported(min_images: int = 1000) -> bool:
+    if not ARSL_OUT.exists():
+        return False
+    count = sum(
+        1
+        for p in ARSL_OUT.rglob("*")
+        if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}
+    )
+    return count >= min_images
+
+
+def download_arsl_hf(limit_per_class: int | None = 400) -> Path | None:
+    """Export ArSL2018 from Hugging Face into ``ml/data/arsl/<class>/``."""
+    print(f"[arsl] downloading from Hugging Face ({HF_ARSL_REPO})...")
+    try:
+        from datasets import load_dataset
+    except ImportError:
+        sys.exit("Install the `datasets` package: pip install datasets huggingface_hub")
+
+    if _arsl_already_exported():
+        print(f"[arsl] already exported at {ARSL_OUT}")
+        return ARSL_OUT
+
+    ds = load_dataset(HF_ARSL_REPO, split="train")
+    label_names: list[str] = ds.features["label"].names  # type: ignore[attr-defined]
+    class_counts = {name: 0 for name in label_names}
+
+    ARSL_OUT.mkdir(parents=True, exist_ok=True)
+    exported = 0
+    for i, row in enumerate(ds):
+        label_idx = int(row["label"])
+        class_name = label_names[label_idx]
+        if limit_per_class is not None and class_counts[class_name] >= limit_per_class:
             continue
-        if entry.is_dir():
-            shutil.copytree(entry, dest)
-        else:
-            shutil.copy2(entry, dest)
-    print(f"[{key}] done.")
+        cls_dir = ARSL_OUT / class_name
+        cls_dir.mkdir(parents=True, exist_ok=True)
+        img = row["image"]
+        out_path = cls_dir / f"{class_counts[class_name]:05d}.png"
+        img.save(out_path)
+        class_counts[class_name] += 1
+        exported += 1
+        if limit_per_class is not None and all(
+            c >= limit_per_class for c in class_counts.values()
+        ):
+            break
+        if (i + 1) % 5000 == 0:
+            print(f"  scanned {i + 1:,} rows, exported {exported:,} images...")
+
+    if exported == 0:
+        print("[arsl] Hugging Face export produced no images.")
+        return None
+
+    print(f"[arsl] exported {exported:,} images to {ARSL_OUT}")
+    for name in label_names:
+        print(f"    {name:8s} -> {class_counts[name]:4d} images")
+    return ARSL_OUT
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--skip", nargs="*", default=[], choices=DATASETS.keys())
+    ap.add_argument("--skip", nargs="*", default=[], choices=["asl", "mnist", "arsl"])
+    ap.add_argument(
+        "--arsl-limit",
+        type=int,
+        default=400,
+        help="Max images per ArSL class to export from Hugging Face (default 400).",
+    )
+    ap.add_argument(
+        "--arsl-full",
+        action="store_true",
+        help="Export the full 54k-image ArSL2018 set (overrides --arsl-limit).",
+    )
     args = ap.parse_args()
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    _ensure_kaggle_credentials()
-    for key, slugs in DATASETS.items():
+
+    index: dict[str, str] = {}
+    if INDEX_PATH.exists():
+        try:
+            index = json.loads(INDEX_PATH.read_text())
+        except json.JSONDecodeError:
+            index = {}
+
+    need_kaggle = any(k not in args.skip for k in KAGGLE_DATASETS)
+    if need_kaggle:
+        _ensure_kaggle_credentials()
+
+    for key, slugs in KAGGLE_DATASETS.items():
         if key in args.skip:
             print(f"[{key}] skipped by --skip flag")
             continue
-        download_one(key, slugs)
+        if key in index and Path(index[key]).exists():
+            print(f"[{key}] already indexed at {index[key]}, skipping.")
+            continue
+        src = download_kaggle_one(key, slugs)
+        if src is not None:
+            index[key] = str(src)
 
-    print("\nAll downloads attempted. Layout:")
-    for p in sorted(DATA_DIR.rglob("*"))[:25]:
-        print(" ", p.relative_to(DATA_DIR))
-    if len(list(DATA_DIR.rglob("*"))) > 25:
-        print("  ...")
+    if "arsl" not in args.skip:
+        if "arsl" in index and Path(index["arsl"]).exists() and _arsl_already_exported():
+            print(f"[arsl] already indexed at {index['arsl']}, skipping.")
+        else:
+            limit = None if args.arsl_full else args.arsl_limit
+            src = download_arsl_hf(limit_per_class=limit)
+            if src is not None:
+                index["arsl"] = str(src)
+
+    INDEX_PATH.write_text(json.dumps(index, indent=2))
+    print("\nDataset index written to", INDEX_PATH)
+    for k, v in index.items():
+        print(f"  {k:6s} -> {v}")
 
 
 if __name__ == "__main__":

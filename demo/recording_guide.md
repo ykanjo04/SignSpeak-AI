@@ -12,7 +12,7 @@ The CSCI435 project brief asks for a **2-3 minute** demonstration video that cap
 In OBS, create one Scene with three Sources stacked top to bottom in the canvas:
 
 1. **Display Capture** of your full screen (we'll crop to the browser).
-2. **Window Capture** of Chrome showing `http://localhost:3000/live` - placed on top so it's the visible layer.
+2. **Window Capture** of Chrome showing `http://localhost:8000/live/` - placed on top so it's the visible layer.
 3. **Audio Input** of the microphone.
 
 Recording settings:
@@ -25,19 +25,12 @@ Recording settings:
 
 ## Pre-recording checklist
 
-1. Start the backend:
+1. Start the app (builds frontend + backend on one port):
    ```powershell
    cd C:\Users\ykanj\Downloads\UOWD\Uni25-26\sem3_26\CSCI435\SignSpeak-AI
-   .\.venv\Scripts\Activate.ps1
-   cd backend
-   uvicorn app.main:app --host 127.0.0.1 --port 8000
+   .\scripts\run_app.ps1
    ```
-2. Start the frontend:
-   ```powershell
-   cd C:\Users\ykanj\Downloads\UOWD\Uni25-26\sem3_26\CSCI435\SignSpeak-AI\frontend
-   npm run dev
-   ```
-3. Browser: open `http://localhost:3000`, allow webcam permission, navigate to **Live mode**.
+2. Browser: open `http://localhost:8000`, allow webcam permission, navigate to **Live mode** (`/live/`).
 4. Wear something with no busy patterns. Solid colour shirt is best.
 5. Position the webcam so your face fills the top third of the frame and both hands fit comfortably.
 6. Add side lighting (window or ring light). Avoid harsh backlighting.

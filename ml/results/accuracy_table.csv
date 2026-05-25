@@ -1,0 +1,4 @@
+Subset,Accuracy,N
+Overall (ASL + ArSL),0.9888,1431
+ASL only,0.9930,1421
+ArSL only,0.4000,10

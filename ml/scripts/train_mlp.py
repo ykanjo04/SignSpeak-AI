@@ -26,6 +26,7 @@ import torch.optim as optim
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
+from collections import Counter
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
@@ -37,6 +38,26 @@ from app.models.mlp import LandmarkMLP  # noqa: E402
 DATA_PATH = ROOT / "ml" / "data" / "processed" / "landmarks.npz"
 CKPT_PATH = ROOT / "backend" / "app" / "models" / "checkpoints" / "mlp_static.pt"
 HISTORY_PATH = ROOT / "ml" / "results" / "mlp_history.json"
+
+
+def _train_test_split_safe(
+    X: np.ndarray, y: np.ndarray, test_size: float = 0.15, random_state: int = 42
+):
+    """Stratified split, dropping singleton classes when stratify is impossible."""
+    counts = Counter(y)
+    keep = np.array([counts[int(yi)] >= 2 for yi in y])
+    dropped = int((~keep).sum())
+    if dropped:
+        print(f"  dropping {dropped} samples from singleton classes before split")
+    X, y = X[keep], y[keep]
+    try:
+        return train_test_split(
+            X, y, test_size=test_size, random_state=random_state, stratify=y
+        )
+    except ValueError:
+        return train_test_split(
+            X, y, test_size=test_size, random_state=random_state
+        )
 
 
 def _augment_batch(X: np.ndarray) -> np.ndarray:
@@ -52,9 +73,7 @@ def main() -> None:
     X, y = blob["X"], blob["y"]
     print(f"  X={X.shape}  y={y.shape}  unique classes={len(set(y))}")
 
-    X_tr, X_te, y_tr, y_te = train_test_split(
-        X, y, test_size=0.15, random_state=42, stratify=y
-    )
+    X_tr, X_te, y_tr, y_te = _train_test_split_safe(X, y)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"  device: {device}")
