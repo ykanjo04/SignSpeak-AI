@@ -1,0 +1,96 @@
+"""
+File-upload endpoint - the second input modality required by CSCI435.
+
+The client POSTs an mp4 (or any OpenCV-readable video). The server samples
+``SAMPLE_FPS`` frames per second, runs the same pipeline used by the live
+mode, and returns a JSON transcript:
+
+    {
+        "frames_processed": int,
+        "duration_s": float,
+        "transcript": [
+            {"t_s": float, "label": str, "confidence": float}, ...
+        ],
+        "text": str,           # concatenated display string
+    }
+"""
+
+from __future__ import annotations
+
+import tempfile
+import time
+from pathlib import Path
+from typing import Any
+
+import cv2
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+
+from app.cv.pipeline import Pipeline
+from app.data.labels import display_label
+
+router = APIRouter()
+_pipeline = Pipeline(device="cpu")
+
+SAMPLE_FPS = 5  # process this many frames per second of video
+
+
+@router.post("/upload")
+async def upload_video(
+    file: UploadFile = File(...),
+    language: str = Form("auto"),
+) -> dict[str, Any]:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    suffix = Path(file.filename).suffix or ".mp4"
+    payload = await file.read()
+    if not payload:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(payload)
+        tmp_path = tmp.name
+
+    cap = cv2.VideoCapture(tmp_path)
+    if not cap.isOpened():
+        raise HTTPException(status_code=400, detail="Could not decode video")
+
+    video_fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    stride = max(1, int(round(video_fps / SAMPLE_FPS)))
+
+    _pipeline.reset()
+    t0 = time.perf_counter()
+    transcript: list[dict[str, Any]] = []
+    text_parts: list[str] = []
+    n_processed = 0
+    frame_idx = 0
+
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        if frame_idx % stride == 0:
+            result = _pipeline.run_frame(frame, language=language)
+            n_processed += 1
+            if result.new_letter and result.label_id >= 0:
+                t_s = frame_idx / video_fps
+                transcript.append(
+                    {
+                        "t_s": round(t_s, 2),
+                        "label": result.label,
+                        "display": result.display,
+                        "confidence": round(result.confidence, 4),
+                    }
+                )
+                text_parts.append(display_label(result.label_id))
+        frame_idx += 1
+
+    cap.release()
+    duration = time.perf_counter() - t0
+    return {
+        "frames_processed": n_processed,
+        "duration_s": round(duration, 2),
+        "transcript": transcript,
+        "text": "".join(text_parts),
+        "language": language,
+    }
