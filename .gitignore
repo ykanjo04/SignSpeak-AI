@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# PyTorch / ML
+ml/data/
+ml/cache/
+*.pt
+# Keep small published checkpoints
+!backend/app/models/checkpoints/*.pt
+*.onnx
+
+# Logs
+*.log
+install.log
+frontend_install.log
+training.log
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.npm
+.yarn/
+*.tsbuildinfo
+next-env.d.ts
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Generated outputs (kept in repo; comment out to ignore)
+# report/SignSpeak_AI_Report.docx
+# slides/SignSpeak_AI_Defence.pptx
+
+# Environment
+.env
+.env.local
+.env.*.local
+kaggle.json
