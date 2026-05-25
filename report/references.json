@@ -1,0 +1,82 @@
+[
+  {
+    "id": "lugaresi2019",
+    "text": "C. Lugaresi et al., \"MediaPipe: A framework for building perception pipelines,\" arXiv preprint arXiv:1906.08172, 2019."
+  },
+  {
+    "id": "howard2019",
+    "text": "A. Howard, M. Sandler, G. Chu, L.-C. Chen, B. Chen, M. Tan, W. Wang, Y. Zhu, R. Pang, V. Vasudevan, Q. V. Le, and H. Adam, \"Searching for MobileNetV3,\" in Proc. IEEE Int. Conf. Computer Vision (ICCV), 2019, pp. 1314\u20131324."
+  },
+  {
+    "id": "deng2009",
+    "text": "J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei, \"ImageNet: A large-scale hierarchical image database,\" in Proc. IEEE Conf. Computer Vision and Pattern Recognition (CVPR), 2009, pp. 248\u2013255."
+  },
+  {
+    "id": "canny1986",
+    "text": "J. Canny, \"A computational approach to edge detection,\" IEEE Trans. Pattern Analysis and Machine Intelligence, vol. PAMI-8, no. 6, pp. 679\u2013698, 1986."
+  },
+  {
+    "id": "zuiderveld1994",
+    "text": "K. Zuiderveld, \"Contrast limited adaptive histogram equalization,\" in Graphics Gems IV, P. Heckbert, Ed. San Diego, CA: Academic Press, 1994, pp. 474\u2013485."
+  },
+  {
+    "id": "kingma2014",
+    "text": "D. P. Kingma and J. Ba, \"Adam: A method for stochastic optimization,\" arXiv preprint arXiv:1412.6980, 2014."
+  },
+  {
+    "id": "lucas1981",
+    "text": "B. D. Lucas and T. Kanade, \"An iterative image registration technique with an application to stereo vision,\" in Proc. Int. Joint Conf. Artificial Intelligence (IJCAI), 1981, pp. 674\u2013679."
+  },
+  {
+    "id": "bradski2000",
+    "text": "G. Bradski, \"The OpenCV library,\" Dr. Dobb's Journal of Software Tools, vol. 25, pp. 120\u2013126, 2000."
+  },
+  {
+    "id": "szeliski2022",
+    "text": "R. Szeliski, Computer Vision: Algorithms and Applications, 2nd ed. Springer, 2022."
+  },
+  {
+    "id": "torralba2024",
+    "text": "A. Torralba, P. Isola, and W. T. Freeman, Foundations of Computer Vision. MIT Press, 2024."
+  },
+  {
+    "id": "asl_alphabet",
+    "text": "Akash Nagaraj, \"ASL Alphabet,\" Kaggle dataset, 2018. [Online]. Available: https://www.kaggle.com/datasets/grassknoted/asl-alphabet"
+  },
+  {
+    "id": "sign_mnist",
+    "text": "DataMunge, \"Sign Language MNIST,\" Kaggle dataset, 2017. [Online]. Available: https://www.kaggle.com/datasets/datamunge/sign-language-mnist"
+  },
+  {
+    "id": "arsl2018",
+    "text": "G. Latif, N. Mohammad, J. Alghazo, R. AlKhalaf, and R. AlKhalaf, \"ArASL: Arabic Alphabets Sign Language Dataset,\" Data in Brief, vol. 23, art. 103777, 2019."
+  },
+  {
+    "id": "wlasl",
+    "text": "D. Li, C. Rodriguez, X. Yu, and H. Li, \"Word-level deep sign language recognition from video: A new large-scale dataset and methods comparison,\" in Proc. IEEE Winter Conf. Applications of Computer Vision (WACV), 2020, pp. 1459\u20131469."
+  },
+  {
+    "id": "paszke2019",
+    "text": "A. Paszke et al., \"PyTorch: An imperative style, high-performance deep learning library,\" in Proc. Advances in Neural Information Processing Systems (NeurIPS), 2019, pp. 8024\u20138035."
+  },
+  {
+    "id": "ramirez2020",
+    "text": "S. Ram\u00edrez, \"FastAPI: Modern, fast (high-performance) web framework for building APIs with Python 3.7+ based on standard Python type hints,\" 2020. [Online]. Available: https://fastapi.tiangolo.com/"
+  },
+  {
+    "id": "nextjs",
+    "text": "Vercel, \"Next.js \u2013 The React Framework for the Web,\" 2026. [Online]. Available: https://nextjs.org/"
+  },
+  {
+    "id": "tailwind",
+    "text": "A. Wathan, \"Tailwind CSS \u2013 A utility-first CSS framework,\" 2026. [Online]. Available: https://tailwindcss.com/"
+  },
+  {
+    "id": "csci435_outline",
+    "text": "P. Mukala, \"CSCI435 \u2013 Computer Vision Algorithms and Systems: Subject Outline, Spring 2026,\" University of Wollongong in Dubai, 2026."
+  },
+  {
+    "id": "csci435_project",
+    "text": "P. Mukala, \"CSCI435 \u2013 Computer Vision Algorithms and Systems: Project Description, Spring 2026,\" University of Wollongong in Dubai, 2026."
+  }
+]
