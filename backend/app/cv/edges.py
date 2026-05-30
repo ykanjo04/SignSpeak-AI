@@ -1,11 +1,4 @@
-"""
-Edge detection (CSCI435 capability 6).
-
-Runs Canny (Canny 1986) on the hand crop. The edge map is exposed as
-an optional debug overlay and is also recorded during the ablation
-study to show that landmark-based features outperform raw edge maps
-for this task.
-"""
+"""Canny edge detection on the hand crop."""
 
 from __future__ import annotations
 

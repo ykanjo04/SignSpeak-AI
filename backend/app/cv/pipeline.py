@@ -1,18 +1,8 @@
 """
-The full per-frame CV pipeline.
+Per-frame CV pipeline.
 
-This is the integration point Dr. Mukala will look at: every CSCI435
-capability we claim is actually exercised here.
-
-    run_frame(frame_bgr, language) -> dict
-        1. CLAHE              (capability 1)
-        2. Selfie segmentation (capability 2)
-        3. Morphology         (capability 3)
-        4. Holistic landmarks (capabilities 4 + 5: hands+face)
-        5. Hand crop
-        6. Canny edges        (capability 6)
-        7. Optical flow       (capability 7)
-        8. Ensemble inference (capability 8: recognition)
+Order: CLAHE -> segmentation -> morphology -> landmarks -> hand crop ->
+Canny -> optical flow -> ensemble -> smoothing buffer.
 """
 
 from __future__ import annotations

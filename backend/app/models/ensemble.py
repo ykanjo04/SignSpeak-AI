@@ -1,11 +1,5 @@
 """
-Two-model ensemble.
-
-The landmark MLP and the MobileNetV3 share the same 61-class label space.
-At inference time the two softmax vectors are averaged (geometric mean
-performs slightly better on the validation set, but arithmetic mean is
-within noise) and the argmax is returned together with the averaged
-confidence.
+Two-model ensemble: average MLP and MobileNet softmax, then argmax.
 """
 
 from __future__ import annotations
@@ -86,7 +80,7 @@ class Ensemble:
             per_model["mobilenet"] = float(p.max().item())
 
         if not probs_list:
-            # Random uniform if no models loaded; satisfies smoke tests
+            # fallback when checkpoints are missing
             return -1, 0.0, per_model
 
         avg = torch.stack(probs_list, dim=0).mean(dim=0)

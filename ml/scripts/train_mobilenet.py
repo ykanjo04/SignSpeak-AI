@@ -1,18 +1,4 @@
-"""
-Fine-tune MobileNetV3-Small on hand crops from the same datasets used by
-the MLP. To stay laptop-friendly we:
-
-- freeze most of the backbone (see ``backend/app/models/mobilenet.py``)
-- resize crops to 96x96
-- cap the number of images per class
-
-The script first re-runs MediaPipe Hands on the dataset to extract square
-hand crops and caches them at ``ml/data/processed/crops/<class>/<id>.jpg``.
-
-Run::
-
-    python ml/scripts/train_mobilenet.py
-"""
+"""Fine-tune MobileNetV3 on hand crops. Run: python ml/scripts/train_mobilenet.py"""
 
 from __future__ import annotations
 

@@ -1,13 +1,4 @@
-"""
-Generate the full CSCI435 report as a Word document.
-
-Output: ``report/SignSpeak_AI_Report.docx``
-
-The script tolerates missing artefacts: if model training has not been
-finished yet, sections that need numbers fall back to placeholder text so
-the document is always renderable. Re-running the script after training
-fills in the real numbers automatically.
-"""
+"""Generate report/SignSpeak_AI_Report.docx. Run: python report/generate_report.py"""
 
 from __future__ import annotations
 

@@ -1,12 +1,4 @@
-"""
-Image enhancement (CSCI435 capability 1).
-
-Applies CLAHE (Contrast Limited Adaptive Histogram Equalisation) to the
-luminance channel only, preserving colour. CLAHE is the standard
-illumination-normalisation technique introduced by Zuiderveld (1994);
-it markedly improves recognition accuracy when the camera scene has
-mixed lighting (window glare + office lights, etc.).
-"""
+"""CLAHE luminance enhancement."""
 
 from __future__ import annotations
 

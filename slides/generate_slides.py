@@ -1,11 +1,5 @@
-"""
-Generate the CSCI435 defence slide deck.
+"""Generate slides/SignSpeak_AI_Defence.pptx. Run: python slides/generate_slides.py"""
 
-Output: ``slides/SignSpeak_AI_Defence.pptx``
-
-Twelve slides matching the report structure, with embedded charts from
-``ml/results/`` and a dark professional theme.
-"""
 
 from __future__ import annotations
 

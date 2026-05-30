@@ -1,17 +1,7 @@
 """
-WebSocket endpoint - live webcam mode.
+WebSocket live mode. Client sends JPEG frames; server returns JSON predictions.
 
-The frontend sends one JPEG-encoded frame per message (binary). For each
-frame the per-frame pipeline runs and a JSON dictionary is sent back.
-
-Protocol
---------
-
-Client -> Server: raw JPEG bytes (binary frame).
-Server -> Client: JSON text with the FrameResult dict from `pipeline.py`.
-
-The client can also send a text JSON message ``{"language": "asl"|"arsl"|"auto"}``
-at any time to switch the language filter.
+Optional text message: {"language": "asl"|"arsl"|"auto"}
 """
 
 from __future__ import annotations

@@ -1,14 +1,4 @@
-"""
-Landmark and image augmentation used during training.
-
-Two augmentation policies are exposed:
-
-- ``augment_landmarks`` perturbs the 63-D landmark vector with small
-  rotations, scales, and noise. Used by ``train_mlp.py``.
-- ``image_train_transform`` returns the torchvision pipeline for the
-  MobileNetV3 model and adds random colour jitter to simulate the
-  lighting variation we expect at defence time.
-"""
+"""Landmark and image augmentation for training."""
 
 from __future__ import annotations
 

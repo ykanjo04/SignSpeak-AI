@@ -1,22 +1,4 @@
-"""
-One-shot dataset download helper.
-
-Datasets used by SignSpeak AI:
-    1. ASL Alphabet         (grassknoted/asl-alphabet)          — Kaggle
-    2. Sign Language MNIST  (datamunge/sign-language-mnist)     — Kaggle
-    3. ArSL2018             (pain/ArASL_Database_Grayscale)     — Hugging Face
-
-The script records the on-disk locations of each successfully downloaded
-dataset in ``ml/data/datasets.json``. ``extract_landmarks.py`` reads that
-JSON to find the source images.
-
-ArSL is fetched from Hugging Face because every Kaggle ArSL mirror requires
-a one-time terms-acceptance click on the dataset page (403 otherwise).
-
-Usage:
-    python ml/scripts/download_datasets.py [--skip arsl|asl|mnist]
-    python ml/scripts/download_datasets.py --arsl-limit 400
-"""
+"""Download ASL, MNIST, and ArSL datasets. Writes paths to ml/data/datasets.json."""
 
 from __future__ import annotations
 

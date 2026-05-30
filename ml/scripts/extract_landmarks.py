@@ -1,17 +1,7 @@
 """
-Extract MediaPipe hand landmarks from every image in the downloaded datasets
-and save them as a single ``.npz`` file.
+Extract MediaPipe hand landmarks to ml/data/processed/landmarks.npz.
 
-Output layout (in ``ml/data/processed/``):
-    landmarks.npz  ->  arrays:
-        X        (N, 63)   float32   wrist-normalised landmark vectors
-        y        (N,)      int64     class ids in the 61-class label space
-        source   (N,)      U16       'asl' | 'arsl' | 'mnist'
-        path     (N,)      U200      original file path (relative)
-
-Run as::
-
-    python ml/scripts/extract_landmarks.py [--limit-per-class N]
+Run: python ml/scripts/extract_landmarks.py [--limit-per-class N]
 """
 
 from __future__ import annotations
@@ -102,8 +92,7 @@ def _label_id_for(source: str, raw_class_name: str) -> int | None:
     """Map a raw on-disk class name to the global 0..60 label id."""
     nm = raw_class_name.strip().lower()
     if source in ("asl", "mnist"):
-        # Match ASL_CLASSES case-insensitively. The mnist split has no
-        # SPACE/DELETE/NOTHING and uses 0..25 -> A..Z. Same trick works.
+        # Match ASL class folders (also handles numeric 0..25 folders).
         upper = nm.upper()
         for i, c in enumerate(ASL_CLASSES):
             if c == upper:
@@ -126,8 +115,7 @@ def _iter_dataset_images(
     source: str,
     limit_per_class: int | None,
 ) -> Iterable[tuple[int, Path]]:
-    # Different Kaggle packagings put the class folders at different
-    # depths; search up to two levels deep.
+    # Search up to two levels deep for class folders.
     base = _source_root(source)
     if base is None:
         return

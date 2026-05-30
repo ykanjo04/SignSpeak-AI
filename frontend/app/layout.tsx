@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SignSpeak AI - ASL + ArSL Translator",
   description:
-    "Real-time American and Arabic Sign Language translation in your browser. Built for CSCI435 at UOWD.",
+    "Real-time American and Arabic Sign Language translation in your browser.",
 };
 
 function Nav() {
@@ -36,7 +36,7 @@ export default function RootLayout({
         <Nav />
         <main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
         <footer className="max-w-6xl mx-auto px-6 py-10 text-xs text-slate-400">
-          SignSpeak AI &middot; CSCI435 Spring 2026 &middot; University of Wollongong in Dubai
+          SignSpeak AI
         </footer>
       </body>
     </html>

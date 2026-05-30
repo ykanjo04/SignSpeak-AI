@@ -1,19 +1,4 @@
-"""
-File-upload endpoint - the second input modality required by CSCI435.
-
-The client POSTs an mp4 (or any OpenCV-readable video). The server samples
-``SAMPLE_FPS`` frames per second, runs the same pipeline used by the live
-mode, and returns a JSON transcript:
-
-    {
-        "frames_processed": int,
-        "duration_s": float,
-        "transcript": [
-            {"t_s": float, "label": str, "confidence": float}, ...
-        ],
-        "text": str,           # concatenated display string
-    }
-"""
+"""POST /upload — process a video and return a JSON transcript."""
 
 from __future__ import annotations
 
