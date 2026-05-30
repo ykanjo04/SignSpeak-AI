@@ -51,6 +51,13 @@ class VotingBuffer:
             return None
         return best_id, avg_conf
 
+    def consume_if_new(self, label_id: int) -> bool:
+        """Return ``True`` the first time a stable ``label_id`` is seen."""
+        if label_id == self._last_emitted:
+            return False
+        self._last_emitted = label_id
+        return True
+
     def emit_new(self, label_id: int, confidence: float) -> tuple[int, float] | None:
         """Like ``push`` but only emit when the stable label changes.
 
@@ -60,9 +67,8 @@ class VotingBuffer:
         stable = self.push(label_id, confidence)
         if stable is None:
             return None
-        if stable[0] == self._last_emitted:
+        if not self.consume_if_new(stable[0]):
             return None
-        self._last_emitted = stable[0]
         return stable
 
     def reset(self) -> None:

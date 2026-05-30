@@ -1,7 +1,7 @@
 """
 WebSocket live mode. Client sends JPEG frames; server returns JSON predictions.
 
-Optional text message: {"language": "asl"|"arsl"|"auto"}
+Optional text message: {"language": "asl"|"arsl"}
 """
 
 from __future__ import annotations
@@ -14,16 +14,19 @@ import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.cv.pipeline import Pipeline, result_to_dict
+from app.utils.smoothing import VotingBuffer
 
 logger = logging.getLogger("signspeak.ws")
 router = APIRouter()
+# Live webcam: looser than the old 8/10 gate so sentences actually build.
 _pipeline = Pipeline(device="cpu")
+_pipeline.buffer = VotingBuffer(window=6, majority=4, min_conf=0.5)
 
 
 @router.websocket("/ws/live")
 async def live_endpoint(websocket: WebSocket) -> None:
     await websocket.accept()
-    language = "auto"
+    language = "asl"
     logger.info("WebSocket accepted")
     try:
         while True:
@@ -35,8 +38,8 @@ async def live_endpoint(websocket: WebSocket) -> None:
                     cfg = {}
                 if "language" in cfg:
                     language = str(cfg["language"]).lower()
-                    if language not in {"asl", "arsl", "auto"}:
-                        language = "auto"
+                    if language not in {"asl", "arsl"}:
+                        language = "asl"
                     _pipeline.reset()
                 continue
 

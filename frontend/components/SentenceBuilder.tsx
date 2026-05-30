@@ -5,20 +5,26 @@ import type { PredictionMessage } from "@/lib/types";
 
 interface Props {
   prediction: PredictionMessage | null;
+  language?: string;
 }
 
-export default function SentenceBuilder({ prediction }: Props) {
+export default function SentenceBuilder({ prediction, language }: Props) {
   const [text, setText] = useState<string>("");
 
   useEffect(() => {
-    if (!prediction || !prediction.new_letter) return;
-    const next = prediction.display;
-    if (!next) return;
-    if (prediction.label === "DELETE") {
+    setText("");
+  }, [language]);
+
+  useEffect(() => {
+    if (!prediction?.new_letter || prediction.label_id < 0) return;
+    const name = prediction.label.split(" ")[0];
+    if (name === "DELETE") {
       setText((t) => t.slice(0, -1));
       return;
     }
-    if (prediction.label === "NOTHING") return;
+    if (name === "NOTHING" || name === "...") return;
+    const next = prediction.display;
+    if (!next) return;
     setText((t) => t + next);
   }, [prediction]);
 

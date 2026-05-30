@@ -43,6 +43,22 @@ class LandmarkResult:
         return arr.flatten()                              # (63,)
 
 
+def _prepare_for_hands(img: np.ndarray) -> np.ndarray:
+    """Upscale small frames so MediaPipe Hands can find a signing hand."""
+    if img.ndim == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    h, w = img.shape[:2]
+    min_dim = min(h, w)
+    if min_dim < 256:
+        scale = 256 / min_dim
+        img = cv2.resize(
+            img,
+            (max(1, int(w * scale)), max(1, int(h * scale))),
+            interpolation=cv2.INTER_CUBIC,
+        )
+    return img
+
+
 @lru_cache(maxsize=1)
 def _holistic():
     return mp.solutions.holistic.Holistic(
@@ -56,10 +72,37 @@ def _holistic():
     )
 
 
+@lru_cache(maxsize=1)
+def _hands():
+    return mp.solutions.hands.Hands(
+        static_image_mode=True,
+        max_num_hands=1,
+        model_complexity=1,
+        min_detection_confidence=0.5,
+    )
+
+
 def _pack(landmark_list) -> list[tuple[float, float, float]]:
     if landmark_list is None:
         return []
     return [(lm.x, lm.y, lm.z) for lm in landmark_list.landmark]
+
+
+def _extract_hands_fallback(frame_bgr: np.ndarray) -> LandmarkResult:
+    """Fallback used when Holistic misses a hand-only signing frame."""
+    prepared = _prepare_for_hands(frame_bgr)
+    rgb = cv2.cvtColor(prepared, cv2.COLOR_BGR2RGB)
+    rgb.flags.writeable = False
+    out = _hands().process(rgb)
+    if not out.multi_hand_landmarks:
+        return LandmarkResult()
+    hand = _pack(out.multi_hand_landmarks[0])
+    label = "Right"
+    if out.multi_handedness:
+        label = out.multi_handedness[0].classification[0].label
+    if label == "Left":
+        return LandmarkResult(left_hand=hand)
+    return LandmarkResult(right_hand=hand)
 
 
 def extract_holistic(frame_bgr: np.ndarray) -> LandmarkResult:
@@ -69,12 +112,18 @@ def extract_holistic(frame_bgr: np.ndarray) -> LandmarkResult:
     rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
     rgb.flags.writeable = False
     out = _holistic().process(rgb)
-    return LandmarkResult(
+    result = LandmarkResult(
         right_hand=_pack(out.right_hand_landmarks),
         left_hand=_pack(out.left_hand_landmarks),
         face=_pack(out.face_landmarks),
         pose=_pack(out.pose_landmarks),
     )
+    if not result.has_hand:
+        fallback = _extract_hands_fallback(frame_bgr)
+        if fallback.has_hand:
+            result.right_hand = fallback.right_hand
+            result.left_hand = fallback.left_hand
+    return result
 
 
 def crop_hand(

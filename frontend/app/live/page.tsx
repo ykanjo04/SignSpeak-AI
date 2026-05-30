@@ -9,7 +9,7 @@ import WebcamStream from "@/components/WebcamStream";
 import type { Language, PredictionMessage } from "@/lib/types";
 
 export default function LivePage() {
-  const [language, setLanguage] = useState<Language>("auto");
+  const [language, setLanguage] = useState<Language>("asl");
   const [prediction, setPrediction] = useState<PredictionMessage | null>(null);
 
   return (
@@ -29,7 +29,7 @@ export default function LivePage() {
         <WebcamStream language={language} onPrediction={setPrediction} />
         <div className="space-y-4">
           <PredictionDisplay prediction={prediction} />
-          <SentenceBuilder prediction={prediction} />
+          <SentenceBuilder prediction={prediction} language={language} />
           <StatsPanel prediction={prediction} />
         </div>
       </div>

@@ -10,7 +10,6 @@ interface Props {
 const opts: { id: Language; label: string }[] = [
   { id: "asl", label: "ASL" },
   { id: "arsl", label: "ArSL" },
-  { id: "auto", label: "Auto" },
 ];
 
 export default function LanguageToggle({ value, onChange }: Props) {

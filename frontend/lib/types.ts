@@ -22,4 +22,4 @@ export interface PredictionMessage {
   per_model: Record<string, number>;
 }
 
-export type Language = "asl" | "arsl" | "auto";
+export type Language = "asl" | "arsl";
