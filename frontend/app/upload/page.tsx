@@ -21,7 +21,7 @@ interface UploadResponse {
 }
 
 export default function UploadPage() {
-  const [language, setLanguage] = useState<Language>("auto");
+  const [language, setLanguage] = useState<Language>("asl");
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<UploadResponse | null>(null);
   const [busy, setBusy] = useState(false);
@@ -56,8 +56,7 @@ export default function UploadPage() {
         <div>
           <h1 className="text-3xl font-bold">Upload a video</h1>
           <p className="text-slate-400 text-sm">
-            The second input modality required by the CSCI435 brief. Drop an mp4
-            with a single signer and get back a frame-by-frame transcript.
+            Drop an mp4 with a single signer and get back a frame-by-frame transcript.
           </p>
         </div>
         <LanguageToggle value={language} onChange={setLanguage} />

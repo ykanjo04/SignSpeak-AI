@@ -85,11 +85,16 @@ class Pipeline:
             # 4 + 5 - MediaPipe Holistic (hands + face)
             with Stopwatch() as sw:
                 landmarks: LandmarkResult = extract_holistic(frame_eq)
+                landmark_frame = frame_eq
+                if not landmarks.has_hand:
+                    # CLAHE can suppress hands on noisy re-encoded upload frames.
+                    landmarks = extract_holistic(frame_bgr)
+                    landmark_frame = frame_bgr
             stats.per_stage_ms["holistic"] = sw.ms
 
             # 6 - Canny edge map of the hand crop
             with Stopwatch() as sw:
-                hand_crop = crop_hand(frame_eq, landmarks, size=96, margin=0.3)
+                hand_crop = crop_hand(landmark_frame, landmarks, size=96, margin=0.3)
                 if hand_crop is not None:
                     edge_map = edges_mod.canny(hand_crop)
                     e_density = edges_mod.edge_density(edge_map)
@@ -115,13 +120,13 @@ class Pipeline:
                     )
             stats.per_stage_ms["infer"] = sw.ms
 
-            # Smoothing buffer -> stable prediction
+            # Smoothing buffer -> stable prediction for display + sentence builder
             new_letter = False
             if label_id >= 0:
-                stable = self.buffer.emit_new(label_id, conf)
+                stable = self.buffer.push(label_id, conf)
                 if stable is not None:
                     label_id, conf = stable
-                    new_letter = True
+                    new_letter = self.buffer.consume_if_new(label_id)
 
         # Wall-clock
         self.fps.tick()

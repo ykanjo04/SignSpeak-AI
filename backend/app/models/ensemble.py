@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
-from app.data.labels import NUM_CLASSES
+from app.data.labels import ARSL_INDICES, NUM_CLASSES
 from app.models.mlp import LandmarkMLP
 from app.models.mobilenet import build_mobilenet, preprocess_transform
 
@@ -83,7 +83,16 @@ class Ensemble:
             # fallback when checkpoints are missing
             return -1, 0.0, per_model
 
-        avg = torch.stack(probs_list, dim=0).mean(dim=0)
+        # MobileNet generalises better on ArSL; averaging with the ASL-heavy MLP
+        # suppresses confidence on grayscale Arabic clips.
+        arsl_only = (
+            allowed_indices is not None
+            and set(allowed_indices) == set(ARSL_INDICES)
+        )
+        if arsl_only and self.has_mobile and hand_crop_bgr is not None:
+            avg = probs_list[-1]
+        else:
+            avg = torch.stack(probs_list, dim=0).mean(dim=0)
         if allowed_indices is not None:
             mask = torch.full_like(avg, fill_value=-1.0)
             for i in allowed_indices:
