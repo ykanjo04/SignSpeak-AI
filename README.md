@@ -50,9 +50,6 @@ SignSpeak-AI/
 ├── backend/       FastAPI server, CV pipeline, model checkpoints
 ├── frontend/      Next.js UI (live webcam, upload, TTS)
 ├── ml/            Dataset download, training, evaluation scripts
-├── demo/          Sample videos and recording guide
-├── report/        Project report (DOCX)
-├── slides/        Defence slides (PPTX)
 ├── docs/          Architecture and user story notes
 └── scripts/       Run helpers (e.g. run_app.ps1)
 ```
