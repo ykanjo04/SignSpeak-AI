@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-# ASL Alphabet (Kaggle: grassknoted/asl-alphabet)
+# ASL alphabet classes
 ASL_CLASSES: list[str] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
     "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -20,8 +20,7 @@ ASL_CLASSES: list[str] = [
     "SPACE", "DELETE", "NOTHING",
 ]
 
-# ArSL2018 letters in Arabic transliteration. These match the standard
-# directory names of the Kaggle release of Latif et al. 2019.
+# ArSL2018 letter names (transliteration)
 ARSL_CLASSES: list[str] = [
     "ain", "al", "aleff", "bb", "dal", "dha", "dhad", "fa",
     "gaaf", "ghain", "ha", "haa", "jeem", "kaaf", "khaa", "la",

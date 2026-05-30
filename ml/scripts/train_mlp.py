@@ -1,16 +1,4 @@
-"""
-Train the landmark MLP classifier from scratch.
-
-Inputs:  ml/data/processed/landmarks.npz  (from extract_landmarks.py)
-Outputs:
-    backend/app/models/checkpoints/mlp_static.pt
-    ml/results/mlp_history.json
-    ml/results/training_curves.png  (combined with MobileNet curves later)
-
-Run::
-
-    python ml/scripts/train_mlp.py
-"""
+"""Train the landmark MLP. Run: python ml/scripts/train_mlp.py"""
 
 from __future__ import annotations
 

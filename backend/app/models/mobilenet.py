@@ -1,12 +1,4 @@
-"""
-MobileNetV3-Small fine-tuning wrapper.
-
-Loads the ImageNet-pretrained backbone from torchvision and replaces
-the classifier head with a 61-class linear layer. Most of the backbone
-is frozen so the model trains quickly on CPU.
-
-Reference: A. Howard et al., "Searching for MobileNetV3", ICCV 2019.
-"""
+"""MobileNetV3-Small with a 61-class classifier head."""
 
 from __future__ import annotations
 

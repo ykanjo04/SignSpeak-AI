@@ -1,11 +1,4 @@
-"""
-Binary morphological operations (CSCI435 capability 3).
-
-Cleans the binary segmentation mask produced by ``segment.py``:
-small holes inside the body are filled (closing) and small specks in
-the background are removed (opening). Both are textbook operations
-(Szeliski 2022, ch. 3.3.1).
-"""
+"""Morphological opening/closing on the segmentation mask."""
 
 from __future__ import annotations
 

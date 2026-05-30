@@ -1,13 +1,4 @@
-"""
-Custom landmark-MLP classifier (trained from scratch).
-
-Input: 63-D wrist-normalised flat vector from MediaPipe Hands.
-Output: 61-class log-softmax distribution over the SignSpeak label space.
-
-This model satisfies the CSCI435 requirement that at least one model be
-trained on data curated by the team (we curate the landmarks by running
-MediaPipe ourselves on the public ASL Alphabet and ArSL2018 datasets).
-"""
+"""Landmark MLP: 63-D wrist-normalised input, 61-class output."""
 
 from __future__ import annotations
 

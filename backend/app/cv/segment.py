@@ -1,14 +1,4 @@
-"""
-Image segmentation (CSCI435 capability 2).
-
-Uses Google's MediaPipe Selfie Segmentation model to produce a binary
-foreground mask of the signer's body. The mask is used by ``morph.py``
-to clean the boundary and to mask out background distractors before
-keypoint detection.
-
-The MediaPipe model itself is pre-trained and used as-is; the integration
-inside our pipeline is the original contribution.
-"""
+"""MediaPipe selfie segmentation mask."""
 
 from __future__ import annotations
 

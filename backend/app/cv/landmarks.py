@@ -1,15 +1,4 @@
-"""
-Keypoint detection + face detection (CSCI435 capabilities 4 and 5).
-
-Wraps MediaPipe Holistic, which detects in a single forward pass:
-
-- 21 hand landmarks per hand (left + right)
-- 468 face landmarks
-- 33 body pose landmarks
-
-Only the hand landmarks are fed into our classifiers, but we expose all
-of them through the dataclass so the frontend can render rich overlays.
-"""
+"""MediaPipe Holistic hand, face, and pose landmarks."""
 
 from __future__ import annotations
 

@@ -1,16 +1,4 @@
-"""
-Temporal voting buffer + confidence gate.
-
-This module turns the noisy per-frame class predictions into the stable,
-high-confidence output the user sees on screen.
-
-Two filters are applied:
-
-1. **Majority vote** - the same class id must win in at least
-   ``majority`` of the last ``window`` frames.
-2. **Confidence floor** - the averaged confidence over those winning
-   frames must be at least ``min_conf``.
-"""
+"""Temporal voting buffer and confidence gate."""
 
 from __future__ import annotations
 

@@ -1,17 +1,8 @@
 """
-SignSpeak AI FastAPI application entry point.
+SignSpeak AI API. Serves REST/WebSocket endpoints and the static frontend.
 
-Serves the API and the built Next.js frontend on one port (default 8000).
-
-Run locally with::
-
-    .\\scripts\\run_app.ps1
-
-Or manually::
-
-    cd frontend && npm run build
-    cd ../backend
-    uvicorn app.main:app --host 127.0.0.1 --port 8000
+Run: uvicorn app.main:app --host 127.0.0.1 --port 8000
+Or:  .\\scripts\\run_app.ps1
 """
 
 from __future__ import annotations
@@ -35,10 +26,7 @@ FRONTEND_OUT = PROJECT_ROOT / "frontend" / "out"
 
 app = FastAPI(
     title="SignSpeak AI",
-    description=(
-        "Real-time American + Arabic Sign Language translator built for "
-        "CSCI435 (Computer Vision Algorithms and Systems) at UOWD."
-    ),
+    description="Real-time American and Arabic Sign Language fingerspelling translator.",
     version="1.0.0",
 )
 

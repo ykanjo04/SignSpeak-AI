@@ -1,20 +1,4 @@
-"""
-End-to-end evaluation script.
-
-Produces every figure and table the report needs:
-
-    ml/results/training_curves.png
-    ml/results/confusion_matrix_asl.png
-    ml/results/confusion_matrix_arsl.png
-    ml/results/accuracy_table.csv
-    ml/results/ablation_table.csv
-    ml/results/fps_latency.csv
-    ml/results/per_class_accuracy.csv
-
-Run::
-
-    python ml/scripts/evaluate.py
-"""
+"""Evaluation charts and metrics. Run: python ml/scripts/evaluate.py"""
 
 from __future__ import annotations
 

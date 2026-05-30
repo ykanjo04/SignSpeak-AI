@@ -1,14 +1,4 @@
-"""
-Video processing and moving-object detection (CSCI435 capability 7).
-
-Tracks how much motion is occurring in the hand region between
-consecutive frames via Lucas-Kanade sparse optical flow on the 21 hand
-landmarks. The motion magnitude is used to gate predictions: when the
-signer is holding a stable pose we accept the prediction; when motion
-is high we know they are transitioning and we suppress predictions.
-
-This is a textbook video-processing technique (Lucas & Kanade 1981).
-"""
+"""Optical flow on hand landmarks for motion gating."""
 
 from __future__ import annotations
 

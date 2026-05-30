@@ -1,8 +1,4 @@
-"""
-Generate the architecture diagram for the report and the docs page.
-
-Output: ``report/figures/architecture.png``  (also copied to ``docs/architecture.png``)
-"""
+"""Generate report/figures/architecture.png."""
 
 from __future__ import annotations
 
